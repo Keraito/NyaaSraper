@@ -1,1 +1,1 @@
-# NyaaSraper
+# NyaaScraper
