@@ -4,7 +4,7 @@ from NyaaScraper.items import NyaascraperItem
 class NyaaTorrentsScraper(scrapy.Spider):
     name = "nyaatorrents"
     start_urls = [
-        'https://www.nyaa.se/?page=search&cats=1_37&minage=0&maxage=3&offset=1',
+        'https://www.nyaa.se/?page=search&cats=1_37&minage=0&maxage=1&offset=1',
     ]
 
     def parse(self, response):
