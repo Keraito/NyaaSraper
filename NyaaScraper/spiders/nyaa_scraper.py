@@ -20,6 +20,13 @@ class NyaaTorrentsScraper(scrapy.Spider):
             item['name'] = torrent.css('a::text').extract_first()
             item['url'] = torrent.css('a::attr(href)').extract_first()
             yield request
+        # Extract the url to the next page based on the '>' indicator on the page.
+        # There are two of these indicators on the page.
+        # This line assumes the first in the list is always the '>' instead of the '>>'.
+        next_page = response.css('div.rightpages a::attr(href)').extract_first()
+        if next_page is not None:
+            next_page = response.urljoin(next_page)
+            yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_download_link(self, response):
         # yield {
