@@ -10,10 +10,6 @@ class NyaaTorrentsScraper(scrapy.Spider):
     def parse(self, response):
         for torrent in response.css('td.tlistname'):
             item = NyaascraperItem()
-            # yield {
-            #     'name'  :   torrent.css('a::text').extract_first(),
-            #     'url'   :   torrent.css('a::attr(href)').extract_first(),
-            # }
             request = scrapy.Request(response.urljoin(torrent.css('a::attr(href)').extract_first()), callback=self.parse_download_link)
             request.meta['item'] = item
 
@@ -29,9 +25,6 @@ class NyaaTorrentsScraper(scrapy.Spider):
             yield scrapy.Request(next_page, callback=self.parse)
 
     def parse_download_link(self, response):
-        # yield {
-        #     'time'  :   response.css('td.vtop::text').extract_first()
-        # }
         item = response.meta['item']
         item['date'] = response.css('td.vtop::text').extract_first()
         yield item
