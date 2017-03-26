@@ -20,6 +20,6 @@ class NyaascraperPipeline(object):
         # Convert them into (hours, minutes).
         hm_difference = divmod(difference.days * 1440 + difference.seconds/60, 60)
         # Check if the torrent was uploaded longer than 24 hours ago.
-        if hm_difference > (1, 0):
+        if hm_difference > (24, 0):
             raise DropItem("Torrent not uploaded within 24 hours: %s." % item)
         return item
