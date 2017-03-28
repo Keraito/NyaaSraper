@@ -1,2 +1,4 @@
 *.pyc
 .DS_STORE
+firebase.json
+auth.json
