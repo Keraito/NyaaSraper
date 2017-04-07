@@ -2,3 +2,7 @@
 .DS_STORE
 firebase.json
 auth.json
+/build
+/myenv
+/project.egg-info
+scrapinghub.yml

@@ -1,0 +1,2 @@
+pyrebase==3.0.27
+google-gax==0.12.5
