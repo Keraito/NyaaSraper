@@ -12,21 +12,41 @@ import os
 
 class NyaascraperPipeline(object):
 
+    def __init__(self, api_key, email, password):
+        self.firebase_config_json = {
+            "apiKey": api_key,
+            "authDomain": "nyaalert.firebaseapp.com",
+            "databaseURL": "https://nyaalert.firebaseio.com",
+            "storageBucket": "nyaalert.appspot.com"
+        }
+        self.auth_config_json = {
+            "email" : email,
+            "password" : password
+        }
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            api_key=crawler.settings.get('API_KEY'),
+            email=crawler.settings.get('EMAIL'),
+            password=crawler.settings.get('PASSWORD')
+        )
+
     def open_spider(self, spider):
         self.tracking = ['Saenai Heroine no Sodatekata', 'Rokudenashi Majutsu Koushi to Akashic Records']
         self.qualities = ['720p']
         self.subbers = ['HorribleSubs']
         self.data = []
-        with open('NyaaScraper/firebase.json') as firebase_config:
-            firebase_config_json = json.load(firebase_config)
-            firebase = pyrebase.initialize_app(firebase_config_json)
-            auth = firebase.auth()
-            self.db = firebase.database()
-            with open('NyaaScraper/auth.json') as auth_config:
-                auth_config_json = json.load(auth_config)
-                self.user = auth.sign_in_with_email_and_password(auth_config_json["email"], auth_config_json["password"])
-                # Get all the animes that are currently in the databse. This is an array of PyreResponse objects.
-                self.existing_anime = self.db.child('anime').get().each()
+        # with open('NyaaScraper/firebase.json') as firebase_config:
+        # firebase_config_json = json.load(firebase_config)
+        firebase = pyrebase.initialize_app(self.firebase_config_json)
+        auth = firebase.auth()
+        self.db = firebase.database()
+        # with open('NyaaScraper/auth.json') as auth_config:
+            # auth_config_json = json.load(auth_config)
+        self.user = auth.sign_in_with_email_and_password(self.auth_config_json["email"], self.auth_config_json["password"])
+        # Get all the animes that are currently in the databse. This is an array of PyreResponse objects.
+        self.existing_anime = self.db.child('anime').get().each()
 
     def close_spider(self, spider):
         for new_data in self.data:
