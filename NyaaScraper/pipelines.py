@@ -60,6 +60,7 @@ class NyaascraperPipeline(object):
             if quality not in incoming_name:
                 raise DropItem('Quality %s was not found in %s.' % (quality, item))
             for tracking_subs in self.subbers:
+                # Check whether the title of a tracking anime is in the incoming torrent title.
                 if tracking_subs in incoming_name:
                     # Strip the extension from the title.
                     title, ext = os.path.splitext(incoming_name)
@@ -71,12 +72,17 @@ class NyaascraperPipeline(object):
                         name = name_and_epi[0]
                         # Parse the second episode number to a Integer.
                         epi = int(name_and_epi[1])
+                        # Check whether the anime already exists in the firebase database and whether this is a new episode.
                         for anime in self.existing_anime:
-                            # Check whether the anime already exists in our database and whether this is a new episode.
                             if name == anime.key() and epi <= anime.val():
                                 raise DropItem('Episode number %s already scraped in %s.' % (epi, item))
+                        # Check the currently scraped animes as well.
+                        for scraped_anime in self.data:
+                            if name in scraped_anime and epi <= scraped_anime[name]:
+                                raise DropItem('Previous episode was already scraped in %s.' % item)
                         self.data.append({ name : epi })
                         return item
-                    except TypeError:
+                    # Catch the error thrown when parsing the episode number fails.
+                    except ValueError:
                         raise DropItem('Wrong parsing of episode number in %s.' % item)
             raise DropItem('Not a HorribleSubs episode: %s.' % item)
