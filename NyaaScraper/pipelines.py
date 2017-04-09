@@ -67,18 +67,18 @@ class NyaascraperPipeline(object):
                     name_episode = re.sub('\s*\[\w+\]\s*', '', title)
                     try:
                         # Split on dash with all the necessary whitespaces between and after.
-                        name_and_epi = re.split('\s*-\s*', name_episode)
+                        name_and_epi = name_episode.rsplit(' - ', 1)
                         name = name_and_epi[0]
                         # Parse the second episode number to a Integer.
                         epi = int(name_and_epi[1])
                         # Check whether the anime already exists in the firebase database and whether this is a new episode.
                         for anime in self.existing_anime:
                             if name == anime.key() and epi <= anime.val():
-                                raise DropItem('Episode number %s already scraped in %s.' % (epi, item))
+                                raise DropItem('Firebase already has episode %s of %s.' % (anime.val(), item))
                         # Check the currently scraped animes as well.
                         scraped_anime = self.data
                         if name in scraped_anime and epi <= scraped_anime[name]:
-                            raise DropItem('Previous episode was already scraped in %s.' % item)
+                            raise DropItem('Current scraping already scraped later episode of %s.' % item)
                         self.data.update({ name : epi })
                         return item
                     # Catch the error thrown when parsing the episode number fails.
