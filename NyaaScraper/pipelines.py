@@ -36,7 +36,7 @@ class NyaascraperPipeline(object):
         self.tracking = ['Saenai Heroine no Sodatekata', 'Rokudenashi Majutsu Koushi to Akashic Records']
         self.qualities = ['720p']
         self.subbers = ['HorribleSubs']
-        self.data = []
+        self.data = {}
         # with open('NyaaScraper/firebase.json') as firebase_config:
         # firebase_config_json = json.load(firebase_config)
         firebase = pyrebase.initialize_app(self.firebase_config_json)
@@ -49,9 +49,8 @@ class NyaascraperPipeline(object):
         self.existing_anime = self.db.child('anime').get().each()
 
     def close_spider(self, spider):
-        for new_data in self.data:
-            self.db.child('anime').update(new_data, self.user['idToken'])
-            # db.child("users").child("Morty").remove(user['idToken'])
+        self.db.child('anime').update(self.data, self.user['idToken'])
+        # db.child("users").child("Morty").remove(user['idToken'])
 
     def process_item(self, item, spider):
         incoming_name = item['name']
@@ -77,10 +76,10 @@ class NyaascraperPipeline(object):
                             if name == anime.key() and epi <= anime.val():
                                 raise DropItem('Episode number %s already scraped in %s.' % (epi, item))
                         # Check the currently scraped animes as well.
-                        for scraped_anime in self.data:
-                            if name in scraped_anime and epi <= scraped_anime[name]:
-                                raise DropItem('Previous episode was already scraped in %s.' % item)
-                        self.data.append({ name : epi })
+                        scraped_anime = self.data
+                        if name in scraped_anime and epi <= scraped_anime[name]:
+                            raise DropItem('Previous episode was already scraped in %s.' % item)
+                        self.data.update({ name : epi })
                         return item
                     # Catch the error thrown when parsing the episode number fails.
                     except ValueError:
